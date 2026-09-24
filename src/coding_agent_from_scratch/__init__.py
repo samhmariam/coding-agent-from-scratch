@@ -1,2 +1,1 @@
-def main() -> None:
-    print("Hello from coding-agent-from-scratch!")
+"""A workspace-scoped terminal coding agent."""

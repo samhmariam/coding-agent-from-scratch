@@ -1,7 +1,7 @@
 [project]
 name = "coding-agent-from-scratch"
 version = "0.1.0"
-description = "Add your description here"
+description = "A workspace-scoped terminal coding agent with structured tool calling"
 readme = "README.md"
 authors = [
     { name = "Samuel H.Mariam", email = "samhmariam@gmail.com" }
@@ -13,7 +13,7 @@ dependencies = [
 ]
 
 [project.scripts]
-coding-agent-from-scratch = "coding_agent_from_scratch:main"
+coding-agent-from-scratch = "coding_agent_from_scratch.cli:main"
 
 [build-system]
 requires = ["uv_build>=0.12.10,<0.13.0"]
