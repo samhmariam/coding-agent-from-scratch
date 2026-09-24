@@ -1,6 +1,6 @@
 # Coding agent from scratch
 
-A Python terminal assistant that can list, read, create, and edit files inside a configured workspace.
+A Python terminal assistant that can search, list, read, create, and edit files inside a configured workspace.
 
 ## Setup (PowerShell)
 
@@ -67,3 +67,11 @@ tests/
 Add new tools under `tools/` and register them in `tools/registry.py`. Keep terminal interactions in `cli.py` and model request handling in `model.py`.
 
 The former nested `coding_agent` package and direct-file launcher have been removed. Use the module or console command above.
+
+## Workspace search
+
+Try: `Find every reference to load_config in the workspace.`
+
+`search_files` recursively matches case-sensitive literal text, returning workspace-relative paths, 1-based line numbers, and matching text. The model supplies `query` and `path` (use `.` for the root).
+
+Search skips generated directories (including `.git`, `.venv`, `node_modules`, and caches), `.env` files, symbolic links, directory junctions, binary files, and files larger than 100 KB. It does not interpret `.gitignore`. Results are capped at 100 matching lines, 1,000 examined files, and 1,000 traversed directories. Long lines return a 500-character excerpt with its column offset. A limit flag and skipped-file/error counts indicate incomplete coverage; narrow the search when needed.

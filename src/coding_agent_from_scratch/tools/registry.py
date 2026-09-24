@@ -10,6 +10,7 @@ from .files import (
     read_file_tool,
 )
 from .results import ToolResult
+from .search import search_files_tool
 
 
 @dataclass(frozen=True)
@@ -23,6 +24,19 @@ class ToolDefinition:
 
 def build_tool_registry(config: Config) -> dict[str, ToolDefinition]:
     return {
+        "search_files": ToolDefinition(
+            handler=partial(search_files_tool, workspace_root=config.workspace_root),
+            description=(
+                "Recursively search workspace UTF-8 files for case-sensitive literal text. "
+                "Returns workspace-relative paths, 1-based line numbers, and matching lines. "
+                "Skips generated directories, environment files, links, binary and oversized files. "
+                "Results are bounded; narrow the path or query when truncated."
+            ),
+            parameters={
+                "query": "Nonempty single-line literal text to find (not a regular expression).",
+                "path": "Workspace directory to search recursively. Use '.' for the root.",
+            },
+        ),
         "list_files": ToolDefinition(
             handler=partial(
                 list_files_tool,

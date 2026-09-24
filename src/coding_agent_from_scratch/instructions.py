@@ -10,6 +10,8 @@ Follow the user's request:
 
 Use tools accurately:
 - Use the provided tools to inspect and modify workspace files.
+- Use search_files to locate relevant code before reading individual files.
+- Search results can be truncated or skip files. Do not treat them as exhaustive.
 - Read relevant files before editing them.
 - Use create_file for new files and edit_file for existing files.
 - Make targeted changes that serve the user's request.
