@@ -3,6 +3,8 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
+from ..approval import WriteApproval, WriteApprovalError, approve_change
+
 from .paths import WorkspacePathError, resolve_workspace_path
 from .results import ToolResult, tool_failure, tool_success
 
@@ -190,6 +192,7 @@ def create_file_tool(
     path: str,
     content: str,
     workspace_root: Path,
+    approval: WriteApproval | None = None,
 ) -> ToolResult:
     if not isinstance(content, str):
         return tool_failure(
@@ -203,6 +206,12 @@ def create_file_tool(
         # Validate encoding before creating the file.
         encoded_content = content.encode("utf-8")
 
+        if full_path.exists() or full_path.is_symlink():
+            return tool_failure("FILE_ALREADY_EXISTS", f"Path already exists: {path}")
+        if not full_path.parent.is_dir():
+            return tool_failure("INVALID_PARENT_DIRECTORY", "Parent directory must exist.")
+        approve_change(path, full_path, workspace_root, None, content, approval)
+
         # Exclusive creation: fail if the target already exists.
         with full_path.open("xb") as file:
             file.write(encoded_content)
@@ -212,6 +221,9 @@ def create_file_tool(
             "action": "created",
             "size_bytes": len(encoded_content),
         })
+
+    except WriteApprovalError as error:
+        return tool_failure(error.code, str(error))
 
     except WorkspacePathError as error:
         return tool_failure(error.code, str(error))
@@ -252,6 +264,7 @@ def edit_file_tool(
     old_str: str,
     new_str: str,
     workspace_root: Path,
+    approval: WriteApproval | None = None,
 ) -> ToolResult:
     if not isinstance(old_str, str) or not isinstance(new_str, str):
         return tool_failure(
@@ -298,6 +311,8 @@ def edit_file_tool(
             })
 
         edited = original.replace(old_str, new_str, 1)
+        edited.encode("utf-8")
+        approve_change(path, full_path, workspace_root, original, edited, approval)
         replace_file_content(full_path, edited)
 
         return tool_success({
@@ -305,6 +320,9 @@ def edit_file_tool(
             "action": "edited",
             "replacements": 1,
         })
+
+    except WriteApprovalError as error:
+        return tool_failure(error.code, str(error))
 
     except WorkspacePathError as error:
         return tool_failure(error.code, str(error))

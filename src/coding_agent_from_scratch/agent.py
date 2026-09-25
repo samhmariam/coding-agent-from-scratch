@@ -2,6 +2,7 @@ from typing import Any
 
 from openai import OpenAI
 
+from .approval import WriteCancelled
 from .config import Config
 from .conversation import add_model_response, add_tool_result, add_user_message
 from .model import execute_llm_call
@@ -59,6 +60,13 @@ def run_agent_turn(
                     arguments_json=tool_call.arguments,
                     registry=registry,
                 )
+            except WriteCancelled:
+                for pending_call in tool_calls[index:]:
+                    add_tool_result(
+                        conversation, pending_call.call_id,
+                        tool_failure("TURN_CANCELLED", "The user cancelled the turn. This tool was not executed."),
+                    )
+                raise
             except KeyboardInterrupt:
                 # An interrupted write may already have changed a file.
                 # Record the uncertainty rather than claiming failure

@@ -1,5 +1,7 @@
 import json
 
+from ..approval import WriteCancelled
+
 from .registry import ToolDefinition
 from .results import ToolResult, tool_failure
 
@@ -70,6 +72,8 @@ def dispatch_tool_call(
 
     try:
         return definition.handler(**arguments)
+    except WriteCancelled:
+        raise
     except Exception:
         # Expected failures are already handled by individual tools.
         # Keep an unexpected failure from terminating the agent loop.

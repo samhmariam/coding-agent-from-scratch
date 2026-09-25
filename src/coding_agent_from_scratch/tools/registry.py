@@ -3,6 +3,7 @@ from functools import partial
 from typing import Any, Callable
 
 from ..config import Config
+from ..approval import WriteApproval, require_approval
 from .files import (
     create_file_tool,
     edit_file_tool,
@@ -22,7 +23,7 @@ class ToolDefinition:
     parameters: dict[str, str]
 
 
-def build_tool_registry(config: Config) -> dict[str, ToolDefinition]:
+def build_tool_registry(config: Config, approval: WriteApproval = require_approval) -> dict[str, ToolDefinition]:
     return {
         "search_files": ToolDefinition(
             handler=partial(search_files_tool, workspace_root=config.workspace_root),
@@ -67,6 +68,7 @@ def build_tool_registry(config: Config) -> dict[str, ToolDefinition]:
             handler=partial(
                 create_file_tool,
                 workspace_root=config.workspace_root,
+                approval=approval,
             ),
             description=(
                 "Create a UTF-8 text file within the workspace. "
@@ -82,6 +84,7 @@ def build_tool_registry(config: Config) -> dict[str, ToolDefinition]:
             handler=partial(
                 edit_file_tool,
                 workspace_root=config.workspace_root,
+                approval=approval,
             ),
             description=(
                 "Replace exactly one occurrence of text in an existing "
